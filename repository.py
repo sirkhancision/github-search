@@ -34,4 +34,3 @@ class Repository:
         print(f"Forks: {self.forks}")
         print(f"Última atualização: {self.last_update_date}")
         print(f"URL: {self.url}")
-        print()

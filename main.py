@@ -8,11 +8,15 @@ def main():
     print("Digite o termo de pesquisa: ")
     query = input()
     search_result = search(query)
-    sorted_result = search_result.sort(key=lambda repo: repo.stars, reverse=True)
+    search_result.sort(key=lambda repo: repo.stars, reverse=True)
     print()
 
-    for result in search_result:
-        result.display()
+    for index, result in enumerate(search_result):
+        if index < len(search_result) - 1:
+            result.display()
+            print()
+        else:
+            result.display()
 
 
 if __name__ == "__main__":
