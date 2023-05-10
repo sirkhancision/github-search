@@ -24,13 +24,3 @@ class Repository:
         self.forks = None
         self.last_update_date = None
         self.url = None
-
-    def display(self):
-        print(f"Nome: {self.name}")
-        print(f"Descrição: {self.description}")
-        print(f"Autor: {self.author}")
-        print(f"Linguagem: {self.language}")
-        print(f"Estrelas: {self.stars}")
-        print(f"Forks: {self.forks}")
-        print(f"Última atualização: {self.last_update_date}")
-        print(f"URL: {self.url}")

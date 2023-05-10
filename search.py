@@ -18,14 +18,12 @@ def search(query):
     # formatar o termo de pesquisa corretamente para o url
     query = query.replace(" ", "+")
     search_url = API_URL + query
-    search_content = requests.get(search_url)
 
     try:
         search_content = requests.get(search_url).json()
     except requests.exceptions.ConnectionError as e:
         print("Erro de conexão:", e)
-        print("Tentando novamente em 5 segundos...")
-        time.sleep(5)
+        return None
 
     for page in range(1, 35):
         search_url = API_URL + query + "&page=" + str(page)
