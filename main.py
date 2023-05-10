@@ -7,12 +7,16 @@ from repository import Repository
 from search import search
 
 
+current_page = 1
+
+
 def search_repositories():
     """
     Realiza a busca dos repositórios, imprimindo-os em ordem decrescente de acordo
     com o número de estrelas de cada um, com avisos no caso de uma pesquisa vazia, problemas de conexão
     ou de não obter resultados
     """
+    global current_page
     query = search_entry.get()
 
     # se o usuário realizar uma pesquisa nula, o programa dá um aviso
@@ -22,7 +26,7 @@ def search_repositories():
         )
         return
 
-    search_result = search(query)
+    search_result, total_pages = search(query, current_page)
 
     # se houver um problema com a conexão, o programa dá um aviso
     if search_result is None:
@@ -41,8 +45,12 @@ def search_repositories():
         messagebox.showinfo("Nenhum resultado", "Nenhum repositório foi encontrado.")
         return
 
-    search_result.sort(key=lambda repo: repo.stars, reverse=True)
     display_repositories(search_result)
+
+    previous_page_button.config(state=tk.NORMAL if current_page > 1 else tk.DISABLED)
+    next_page_button.config(
+        state=tk.NORMAL if current_page < total_pages else tk.DISABLED
+    )
 
 
 def display_repositories(repositories):
@@ -65,10 +73,22 @@ def display_repositories(repositories):
     result_text.config(state=tk.DISABLED)
 
 
+def previous_page():
+    global current_page
+    current_page -= 1
+    search_repositories()
+
+
+def next_page():
+    global current_page
+    current_page += 1
+    search_repositories()
+
+
 # criar a janela do programa
 window = tk.Tk()
 window.title("Pesquisa no GitHub")
-window.geometry("600x400")
+window.geometry("660x440")
 
 # mudar a cor de fundo da janela
 window.configure(bg="dimgray")
@@ -99,6 +119,16 @@ result_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
 result_text.config(yscrollcommand=result_scrollbar.set)
 result_text.config(state=tk.DISABLED)
+
+previous_page_button = tk.Button(
+    window, text="Anterior", command=previous_page, bg="darkgray", fg="black"
+)
+previous_page_button.pack(side=tk.LEFT)
+
+next_page_button = tk.Button(
+    window, text="Próxima", command=next_page, bg="darkgray", fg="black"
+)
+next_page_button.pack(side=tk.RIGHT)
 
 # iniciar o loop da interface gráfica
 window.mainloop()
