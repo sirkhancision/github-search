@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.11
 
 import tkinter as tk
+import webbrowser
 from tkinter import messagebox
 from tkinter import ttk
 from repository import Repository
@@ -8,65 +9,41 @@ from search import search
 
 
 current_page = 1
-NUM_PAGES_DISPLAYED = 6
+pagination_frame = None
+page_number_label = None
 
 
-def go_to_page(destination):
+def reset_page():
     global current_page
-    current_page = destination
-    search_repositories()
+    current_page = 1
 
 
-def display_pagination(current_page, total_pages):
+def display_pagination(total_pages):
+    global current_page, pagination_frame, page_number_label
+
+    if pagination_frame is not None:
+        pagination_frame.pack_forget()
+
     pagination_frame = tk.Frame(window, bg="dimgray")
     pagination_frame.pack()
 
-    start_page = max(current_page - NUM_PAGES_DISPLAYED // 2, 1)
-    end_page = min(start_page + NUM_PAGES_DISPLAYED - 1, total_pages)
+    page_number_label_frame = tk.Frame(pagination_frame, bg="dimgray")
+    page_number_label_frame.pack(pady=10)
 
-    for child in pagination_frame.winfo_children():
-        child.destroy()
+    page_number_label_bg = "gainsboro"
+    page_number_label_size = 40
+    page_number_label_padding = 5
 
-    button_width = 2
-
-    for page in range(start_page, end_page + 1):
-        button = tk.Button(
-            pagination_frame,
-            text=str(page),
-            width=button_width,
-            command=lambda p=page: go_to_page(p),
-            bg="darkgray",
-            fg="black",
-        )
-        button.pack(side=tk.LEFT)
-
-    if start_page > 1:
-        ellipsis_label = tk.Label(pagination_frame, text="...", bg="dimgray")
-        ellipsis_label.pack(side=tk.LEFT)
-
-        first_page_button = tk.Button(
-            pagination_frame,
-            text="1",
-            width=button_width,
-            command=lambda: go_to_page(1),
-            bg="darkgray",
-            fg="black",
-        )
-        first_page_button.pack(side=tk.LEFT)
-
-    if end_page < total_pages:
-        ellipsis_label = tk.Label(pagination_frame, text="...", bg="dimgray")
-        ellipsis_label.pack(side=tk.LEFT)
-
-        last_page_button = tk.Button(
-            pagination_frame,
-            text=str(total_pages),
-            width=button_width,
-            command=lambda: go_to_page(total_pages),
-            bg="darkgray",
-            fg="black",
-        )
-        last_page_button.pack(side=tk.LEFT)
+    page_number_label = tk.Label(
+        page_number_label_frame,
+        text=f"{current_page}/{total_pages}",
+        bg=page_number_label_bg,
+        fg="black",
+        width=page_number_label_size,
+        padx=page_number_label_padding,
+        pady=page_number_label_padding,
+    )
+    page_number_label.pack()
 
 
 def search_repositories():
@@ -86,6 +63,7 @@ def search_repositories():
         return
 
     search_result, total_pages = search(query, current_page)
+
     # a api do github tem um limite de resultados, onde a última página
     # com resultados é a 34
     if total_pages > 34:
@@ -115,7 +93,10 @@ def search_repositories():
         state=tk.NORMAL if current_page < total_pages else tk.DISABLED
     )
 
-    display_pagination(current_page, total_pages)
+    display_pagination(total_pages)
+
+    if page_number_label is not None:
+        page_number_label.config(text=f"{current_page}/{total_pages}")
 
 
 def display_repositories(repositories):
@@ -126,14 +107,38 @@ def display_repositories(repositories):
     result_text.delete(1.0, tk.END)
 
     for result in repositories:
-        result_text.insert(tk.END, f"Nome: {result.name}\n")
-        result_text.insert(tk.END, f"Descrição: {result.description}\n")
-        result_text.insert(tk.END, f"Autor: {result.author}\n")
-        result_text.insert(tk.END, f"Linguagem: {result.language}\n")
-        result_text.insert(tk.END, f"Estrelas: {result.stars}\n")
-        result_text.insert(tk.END, f"Forks: {result.forks}\n")
-        result_text.insert(tk.END, f"Última atualização: {result.last_update_date}\n")
-        result_text.insert(tk.END, f"URL: {result.url}\n\n")
+        result_text.insert(
+            tk.END, f"Nome: {result.name if result.name is not None else 'Não há'}\n"
+        )
+        result_text.insert(
+            tk.END,
+            f"Descrição: {result.description if result.description is not None else 'Não há'}\n",
+        )
+        result_text.insert(
+            tk.END,
+            f"Autor: {result.author if result.author is not None else 'Não há'}\n",
+        )
+        result_text.insert(
+            tk.END,
+            f"Linguagem: {result.language if result.language is not None else 'Não há'}\n",
+        )
+        result_text.insert(
+            tk.END,
+            f"Estrelas: {result.stars if result.stars is not None else 'Não há'}\n",
+        )
+        result_text.insert(
+            tk.END, f"Forks: {result.forks if result.forks is not None else 'Não há'}\n"
+        )
+        result_text.insert(
+            tk.END,
+            f"Última atualização: {result.last_update_date if result.last_update_date is not None else 'Não há'}\n",
+        )
+        result_text.insert(tk.END, "URL: ")
+        result_text.insert(
+            tk.END,
+            f"{result.url if result.url is not None else 'Não há'}\n\n",
+            "hyperlink",
+        )
 
     result_text.config(state=tk.DISABLED)
 
@@ -148,6 +153,13 @@ def next_page():
     global current_page
     current_page += 1
     search_repositories()
+
+
+def open_link(event):
+    url_start = event.widget.tag_ranges("hyperlink")[0]
+    url_end = event.widget.tag_ranges("hyperlink")[1]
+    url = event.widget.get(url_start, url_end)
+    webbrowser.open(url)
 
 
 # criar a janela do programa
@@ -167,8 +179,13 @@ search_entry.pack()
 
 # criar o botão de pesquisa
 search_button = tk.Button(
-    window, text="Pesquisar", command=search_repositories, bg="darkgray", fg="black"
+    window,
+    text="Pesquisar",
+    command=lambda: reset_page() or search_repositories(),
+    bg="darkgray",
+    fg="black",
 )
+current_page = 1
 search_button.pack()
 
 # criar o campo em que os repositórios serão imprimidos
@@ -178,6 +195,9 @@ result_frame.pack(fill=tk.BOTH, expand=True)
 
 result_text = tk.Text(result_frame, width=80, height=20, bg="white", fg="black")
 result_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+result_text.tag_configure("hyperlink", foreground="blue", underline=True)
+result_text.tag_bind("hyperlink", "<Button-1>", open_link)
 
 result_scrollbar = tk.Scrollbar(result_frame, command=result_text.yview, bg="dimgray")
 result_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
