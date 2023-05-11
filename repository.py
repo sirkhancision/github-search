@@ -5,14 +5,14 @@ class Repository:
     """
     Classe que representa cada repositório do GitHub encontrado
 
-    name (str): Nome do repositório
-    description (str): Descrição do repositório
-    author (str): Nome do autor do repositório
-    language (str): Linguagem usada no repositório
-    stars (str): Número de estrelas do repositório
-    forks (str): Número de forks do repositório
-    last_update_date (str): Data da última atualização do repositório
-    url (str): URL do repositório
+    name: Nome do repositório
+    description: Descrição do repositório
+    author: Nome do autor do repositório
+    language: Linguagem usada no repositório
+    stars: Número de estrelas do repositório
+    forks: Número de forks do repositório
+    last_update_date: Data da última atualização do repositório
+    url: URL do repositório
     """
 
     def __init__(self):

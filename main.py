@@ -14,13 +14,21 @@ page_number_label = None
 
 
 def reset_page():
+    """
+    Reseta o valor da página para a primeira página
+    """
     global current_page
     current_page = 1
 
 
 def display_pagination(total_pages):
+    """
+    Imprime um retangulo com uma indicação do número de páginas
+    Formato: página atual/número de páginas
+    """
     global current_page, pagination_frame, page_number_label
 
+    # apaga o quadro de paginação caso já exista
     if pagination_frame is not None:
         pagination_frame.pack_forget()
 
@@ -88,6 +96,8 @@ def search_repositories():
 
     display_repositories(search_result)
 
+    # ativa ou desativa os botões de avançar ou retroceder a página, caso
+    # haja uma página para avançar ou retroceder
     previous_page_button.config(state=tk.NORMAL if current_page > 1 else tk.DISABLED)
     next_page_button.config(
         state=tk.NORMAL if current_page < total_pages else tk.DISABLED
@@ -144,18 +154,27 @@ def display_repositories(repositories):
 
 
 def previous_page():
+    """
+    Retrocede a página
+    """
     global current_page
     current_page -= 1
     search_repositories()
 
 
 def next_page():
+    """
+    Avança a página
+    """
     global current_page
     current_page += 1
     search_repositories()
 
 
 def open_link(event):
+    """
+    Abre um link no navegador padrão
+    """
     url_start = event.widget.tag_ranges("hyperlink")[0]
     url_end = event.widget.tag_ranges("hyperlink")[1]
     url = event.widget.get(url_start, url_end)
@@ -185,7 +204,6 @@ search_button = tk.Button(
     bg="darkgray",
     fg="black",
 )
-current_page = 1
 search_button.pack()
 
 # criar o campo em que os repositórios serão imprimidos
@@ -196,15 +214,18 @@ result_frame.pack(fill=tk.BOTH, expand=True)
 result_text = tk.Text(result_frame, width=80, height=20, bg="white", fg="black")
 result_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
+# configura uma tag para links clicáveis
 result_text.tag_configure("hyperlink", foreground="blue", underline=True)
 result_text.tag_bind("hyperlink", "<Button-1>", open_link)
 
+# cria uma barra de rolamento para o texto
 result_scrollbar = tk.Scrollbar(result_frame, command=result_text.yview, bg="dimgray")
 result_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
 result_text.config(yscrollcommand=result_scrollbar.set)
 result_text.config(state=tk.DISABLED)
 
+# cria botões para avançar ou retroceder a página
 previous_page_button = tk.Button(
     window, text="Anterior", command=previous_page, bg="darkgray", fg="black"
 )

@@ -11,7 +11,7 @@ def search(query, current_page):
     """
     Realiza a busca de repositórios no GitHub com base no termo de busca (query)
 
-    Retorna uma lista com os objetos dos repositórios encontrados
+    Retorna uma lista com os objetos dos repositórios encontrados, e o número total de páginas de resultados
     """
     API_URL = "https://api.github.com/search/repositories?q="
     # formato para imprimir a data de atualização do repositório
