@@ -8,6 +8,65 @@ from search import search
 
 
 current_page = 1
+NUM_PAGES_DISPLAYED = 6
+
+
+def go_to_page(destination):
+    global current_page
+    current_page = destination
+    search_repositories()
+
+
+def display_pagination(current_page, total_pages):
+    pagination_frame = tk.Frame(window, bg="dimgray")
+    pagination_frame.pack()
+
+    start_page = max(current_page - NUM_PAGES_DISPLAYED // 2, 1)
+    end_page = min(start_page + NUM_PAGES_DISPLAYED - 1, total_pages)
+
+    for child in pagination_frame.winfo_children():
+        child.destroy()
+
+    button_width = 2
+
+    for page in range(start_page, end_page + 1):
+        button = tk.Button(
+            pagination_frame,
+            text=str(page),
+            width=button_width,
+            command=lambda p=page: go_to_page(p),
+            bg="darkgray",
+            fg="black",
+        )
+        button.pack(side=tk.LEFT)
+
+    if start_page > 1:
+        ellipsis_label = tk.Label(pagination_frame, text="...", bg="dimgray")
+        ellipsis_label.pack(side=tk.LEFT)
+
+        first_page_button = tk.Button(
+            pagination_frame,
+            text="1",
+            width=button_width,
+            command=lambda: go_to_page(1),
+            bg="darkgray",
+            fg="black",
+        )
+        first_page_button.pack(side=tk.LEFT)
+
+    if end_page < total_pages:
+        ellipsis_label = tk.Label(pagination_frame, text="...", bg="dimgray")
+        ellipsis_label.pack(side=tk.LEFT)
+
+        last_page_button = tk.Button(
+            pagination_frame,
+            text=str(total_pages),
+            width=button_width,
+            command=lambda: go_to_page(total_pages),
+            bg="darkgray",
+            fg="black",
+        )
+        last_page_button.pack(side=tk.LEFT)
 
 
 def search_repositories():
@@ -27,6 +86,10 @@ def search_repositories():
         return
 
     search_result, total_pages = search(query, current_page)
+    # a api do github tem um limite de resultados, onde a última página
+    # com resultados é a 34
+    if total_pages > 34:
+        total_pages = 34
 
     # se houver um problema com a conexão, o programa dá um aviso
     if search_result is None:
@@ -51,6 +114,8 @@ def search_repositories():
     next_page_button.config(
         state=tk.NORMAL if current_page < total_pages else tk.DISABLED
     )
+
+    display_pagination(current_page, total_pages)
 
 
 def display_repositories(repositories):
