@@ -4,6 +4,7 @@ import math
 import requests
 import json
 from datetime import datetime
+
 from repository import Repository
 
 
@@ -11,15 +12,16 @@ def search(query, current_page):
     """
     Realiza a busca de repositórios no GitHub com base no termo de busca (query)
 
-    Retorna uma lista com os objetos dos repositórios encontrados, e o número total de páginas de resultados
+    Retorna uma lista com os repositórios encontrados, e o número total de páginas de resultados
     """
     API_URL = "https://api.github.com/search/repositories?q="
-    # formato para imprimir a data de atualização do repositório
+    # formato da data contida no json da API
     DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
     # formatar o termo de pesquisa corretamente para o url
     query = query.replace(" ", "+")
     search_url = API_URL + query + "&sort=stars&per_page=30&page=" + str(current_page)
 
+    # testar a conexão com a internet do usuário
     try:
         search_content = requests.get(search_url).json()
     except requests.exceptions.ConnectionError as e:
@@ -41,15 +43,17 @@ def search(query, current_page):
         )
         url = item["html_url"]
 
-        repo_object = Repository()
-        repo_object.name = name
-        repo_object.description = description
-        repo_object.author = author
-        repo_object.language = language
-        repo_object.stars = stars
-        repo_object.forks = forks
-        repo_object.last_update_date = last_update_date
-        repo_object.url = url
+        # criar um novo objeto de repositório com os dados do repositório atual
+        repo_object = Repository(
+            name=name,
+            description=description,
+            author=author,
+            language=language,
+            stars=stars,
+            forks=forks,
+            last_update_date=last_update_date,
+            url=url,
+        )
 
         repositories.append(repo_object)
 

@@ -2,13 +2,15 @@
 
 import tkinter as tk
 import webbrowser
-from tkinter import messagebox
-from tkinter import ttk
+from tkinter import messagebox, ttk
+
 from repository import Repository
 from search import search
 
-
+# número da página atual
 current_page = 1
+
+# quadro contendo a contagem de páginas
 pagination_frame = None
 page_number_label = None
 
@@ -23,8 +25,8 @@ def reset_page():
 
 def display_pagination(total_pages):
     """
-    Imprime um retangulo com uma indicação do número de páginas
-    Formato: página atual/número de páginas
+    Imprime um retângulo com uma indicação do número de páginas
+    Formato: página atual/número de páginas (e.g. 1/34)
     """
     global current_page, pagination_frame, page_number_label
 
@@ -32,6 +34,8 @@ def display_pagination(total_pages):
     if pagination_frame is not None:
         pagination_frame.pack_forget()
 
+    # informações visuais do quadro de paginação, como
+    # tamanho, cor, espaçamento
     pagination_frame = tk.Frame(window, bg="dimgray")
     pagination_frame.pack()
 
@@ -42,6 +46,7 @@ def display_pagination(total_pages):
     page_number_label_size = 40
     page_number_label_padding = 5
 
+    # criação do quadro de paginação
     page_number_label = tk.Label(
         page_number_label_frame,
         text=f"{current_page}/{total_pages}",
@@ -59,6 +64,8 @@ def search_repositories():
     Realiza a busca dos repositórios, imprimindo-os em ordem decrescente de acordo
     com o número de estrelas de cada um, com avisos no caso de uma pesquisa vazia, problemas de conexão
     ou de não obter resultados
+
+    Utiliza a função search, do arquivo search.py, para realizar a pesquisa de fato
     """
     global current_page
     query = search_entry.get()
@@ -70,6 +77,7 @@ def search_repositories():
         )
         return
 
+    # a busca ocorre aqui
     search_result, total_pages = search(query, current_page)
 
     # a api do github tem um limite de resultados, onde a última página
@@ -94,6 +102,7 @@ def search_repositories():
         messagebox.showinfo("Nenhum resultado", "Nenhum repositório foi encontrado.")
         return
 
+    # imprime os resultados dos repositórios da página atual
     display_repositories(search_result)
 
     # ativa ou desativa os botões de avançar ou retroceder a página, caso
@@ -103,6 +112,7 @@ def search_repositories():
         state=tk.NORMAL if current_page < total_pages else tk.DISABLED
     )
 
+    # exibe e atualiza o quadro de paginação
     display_pagination(total_pages)
 
     if page_number_label is not None:
@@ -111,7 +121,7 @@ def search_repositories():
 
 def display_repositories(repositories):
     """
-    Imprime os repositórios com os dados contidos
+    Imprime os repositórios com os dados formatados
     """
     result_text.config(state=tk.NORMAL)
     result_text.delete(1.0, tk.END)
@@ -156,6 +166,10 @@ def display_repositories(repositories):
 def previous_page():
     """
     Retrocede a página
+
+    Não é necessária a restrição de intervalo (e.g. if current_page > 1),
+    pois essa restrição já é dada na ativação dos botões que realizam
+    essas funções
     """
     global current_page
     current_page -= 1
@@ -165,6 +179,8 @@ def previous_page():
 def next_page():
     """
     Avança a página
+
+    O mesmo de previous_page vale aqui
     """
     global current_page
     current_page += 1
